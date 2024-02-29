@@ -400,10 +400,404 @@ insert into emple
 end;
 /
 
-
-
 begin
 for each in emple begin
 dbms_output.put_line(rowee || 'boomboomboom');
 end;
 /
+
+/* 9-Crea un bloque anónimo que pida un numero de departamento 
+y un numero de empleado. Si el departamento no existe, lo crea. 
+Si el empleado no existe se inserta con el número de empleado, el
+dept y el salario (media salario departamento), 
+si la media del salario es nula, se inserta el salario 0
+*/
+
+DECLARE
+V_INPUT_DEPTNO EMPLE.DEPT_NO%TYPE := &DEPT_NO;
+V_COUNT_DEPTNO NUMBER(10);
+V_INPUT_EMPNO EMPLE.EMP_NO%TYPE := &EMP_NO;
+V_COUNT_EMPNO NUMBER(10);
+V_AVG_SALARIO_DEPT NUMBER(10);
+BEGIN
+
+SELECT COUNT(D.DEPT_NO) INTO V_COUNT_DEPTNO
+FROM DEPART D
+WHERE DEPT_NO = V_INPUT_DEPTNO;
+
+SELECT AVG(SALARIO) INTO V_AVG_SALARIO_DEPT
+FROM EMPLE
+WHERE DEPT_NO = V_INPUT_DEPTNO;
+
+IF V_AVG_SALARIO_DEPT IS NULL THEN
+V_AVG_SALARIO_DEPT := 0;
+END IF;
+
+IF V_COUNT_DEPTNO = 0 THEN
+INSERT INTO DEPART (DEPT_NO) VALUES (V_INPUT_DEPTNO);
+DBMS_OUTPUT.PUT_LINE('NUEVO DEPARTAMENTO CREADO CON VALOR ' || V_INPUT_DEPTNO);
+END IF;
+
+SELECT COUNT(EMP_NO) INTO V_COUNT_EMPNO
+FROM EMPLE
+WHERE EMP_NO = V_INPUT_EMPNO;
+
+IF V_COUNT_EMPNO = 0 THEN
+DBMS_OUTPUT.PUT_LINE('AÑADIENDO EMPLEADO CON VALORES ' ||
+            ' EMP_NO: ' || V_INPUT_EMPNO || ' ALTA: ' || SYSDATE|| 
+            ' SALARIO ' || V_AVG_SALARIO_DEPT || ' DEPARTAMENTO ' ||  V_INPUT_DEPTNO);
+INSERT INTO EMPLE (EMP_NO, FECHA_ALT, SALARIO, DEPT_NO)
+    VALUES(V_INPUT_EMPNO, SYSDATE, V_AVG_SALARIO_DEPT, V_INPUT_DEPTNO);
+ELSE
+DBMS_OUTPUT.PUT_LINE('EMPLE FOUND');
+END IF;
+
+exception
+when no_data_found then
+dbms_output.put_line('NO DATA FOUND NERD');
+END;
+/
+
+/*
+Crea un bloque anónimo que solicite una fecha y nos
+indique si el día cae en fin de semana o no.
+*/
+-- CODE GOLF SQL LET'S GOOOOOOOOOOOOOOOOO
+DECLARE
+I VARCHAR2(10) := TO_NUMBER(TO_CHAR(TO_DATE('&D'), 'D'));
+O VARCHAR2(30) := 'ES FIN DE SEMANA';
+BEGIN
+IF I <= 5 THEN
+O := 'NO ' || O;
+END IF;
+DBMS_OUTPUT.PUT_LINE(O);
+END;
+/
+
+/*
+Crea un bloque anónimo que solicite una fecha y nos muestre que día de la semana es.
+*/
+
+DECLARE
+VINPUT VARCHAR2(10) := TO_CHAR(TO_DATE('&D'), 'Day');
+BEGIN
+DBMS_OUTPUT.PUT_LINE(VINPUT);
+END;
+/
+
+/*
+Crea un bloque anónimo convierta una temperatura a escala Fahrenheit a Celsius y viceversa. El
+programa solicitará introducir una temperatura y una escala.
+Conversión Celsius a Fahrenheit: ((9*temperatura)/5)+32
+Conversión de Fahrenheit a Celsius: ((temperatura-32)*5)/9
+*/
+
+DECLARE
+VINPUT_VALUE NUMBER := &INPUT_TEMPERATURA;
+VOUTPUT_VALUE NUMBER;
+VINPUT_C_OR_F VARCHAR2(10) := UPPER(SUBSTR('&FAHRENHEIT_OR_CELSIUS', 1,1));
+VOPTION1 VARCHAR2(12) := 'FAHRENHEIT';
+VOPTION2 VARCHAR2(12) := 'CELSIUS';
+BEGIN
+
+IF VINPUT_C_OR_F = 'C' THEN
+VOPTION1 := 'CELSIUS';
+VOPTION2 := 'FAHRENHEIT';
+VOUTPUT_VALUE := (9*VINPUT_VALUE)/5+32;
+ELSIF VINPUT_C_OR_F = 'F' THEN
+VOUTPUT_VALUE := ((VINPUT_VALUE-32)*5)/9;
+END IF;
+DBMS_OUTPUT.PUT_LINE(VINPUT_VALUE || ' ' || VOPTION1 ||' ES IGUAL A ' || VOUTPUT_VALUE || ' ' || VOPTION2);
+END;
+/
+
+
+/* 
+EJERCICIOS PL SQL I I I  
+*/
+
+/*
+Dados dos números enteros introducidos por el usuario, uno menor que otro, realizar un
+programa que muestre los números enteros entre los dos números (SIN incluir los mismos)
+*/
+
+DECLARE
+VINPUT1 NUMBER := &INPUT1;
+VINPUT2 NUMBER := &INPUT2;
+VBUFFER NUMBER;
+BEGIN
+IF VINPUT2 < VINPUT1 THEN
+VBUFFER := VINPUT1;
+VINPUT1 := VINPUT2;
+VINPUT2 := VBUFFER;
+END IF;
+DBMS_OUTPUT.PUT_LINE('THE VALUES BETWEEN ' || VINPUT1 || ' AND ' || VINPUT2 || ' ARE');
+FOR I IN VINPUT1+1..VINPUT2-1 LOOP
+DBMS_OUTPUT.PUT(I ||' ');
+END LOOP;
+DBMS_OUTPUT.NEW_LINE;
+END;
+/
+
+/*
+Dado un número entero pedido al usuario determinar si el mismo es par o impar y mostrarlo
+por pantalla. La función MOD(NUMBER M, NUMBER N) devuelve el resto de una división.
+*/
+
+DECLARE
+    VINPUT1 NUMBER := &INPUT1;
+    VOUTPUT VARCHAR2(12) := 'PAR';
+BEGIN
+IF MOD(VINPUT1, 2) = 1 THEN
+    VOUTPUT := 'IM' || VOUTPUT;
+END IF;
+DBMS_OUTPUT.PUT_LINE(VINPUT1 || ' ES UN NÚMERO ' || VOUTPUT);
+END;
+/
+
+/*
+Dados dos números enteros introducidos por el usuario, uno menor que otro, realizar un
+programa que muestre los números PARES enteros entre los dos números (INCLUIR los mismos)
+*/
+
+DECLARE
+    VINPUT1 NUMBER := &INPUT1;
+    VINPUT2 NUMBER := &INPUT2; 
+    VBUFFER NUMBER;
+BEGIN
+
+IF VINPUT2 < VINPUT1 THEN
+    VBUFFER := VINPUT1;
+    VINPUT1 := VINPUT2;
+    VINPUT2 := VBUFFER;
+END IF;
+DBMS_OUTPUT.PUT_LINE('LOS NUMEROS PARES ENTRE ' ||VINPUT1 || ' Y ' || VINPUT2 || ' SON');
+
+FOR I IN (VINPUT1/2)..(VINPUT2/2)-(MOD(VINPUT2,2)) LOOP
+    DBMS_OUTPUT.PUT(I*2 || ', ');
+END LOOP;
+
+DBMS_OUTPUT.NEW_LINE;
+END;
+/
+
+/*
+pedir un numero al usuario y mostrar los n primeros pares empezando desde 0. Usa el bucle
+FOR
+*/
+DECLARE
+VINPUT1 NUMBER := &INPUT1;
+lessthan0 exception;
+BEGIN
+IF VINPUT1 < 0 THEN
+RAISE lessthan0;
+END IF;
+DBMS_OUTPUT.PUT_LINE('LOS NUMEROS PARES ENTRE 0 Y ' || VINPUT1 || ' SON');
+FOR I IN 0..VINPUT1/2 - (MOD(VINPUT1,2)) LOOP
+    DBMS_OUTPUT.PUT(I*2 || ', ');
+    
+END LOOP;
+DBMS_OUTPUT.NEW_LINE;
+EXCEPTION
+WHEN lessthan0 THEN
+    DBMS_OUTPUT.PUT_LINE('HAS ELEGIDO UN NÚMERO MENOR QUE 0');
+END;
+/
+
+
+/*
+Pedir dos números al usuario inicio y fin (fin es mayor o igual que inicio). Mostrar los múltiplos
+de 3 desde fin a inicio ambos incluidos. Usa el bucle FOR.
+*/
+
+DECLARE
+    VINPUT1 NUMBER := &INPUT1;
+    VINPUT2 NUMBER := &INPUT2; 
+    VBUFFER NUMBER;
+BEGIN
+IF VINPUT2 < VINPUT1 THEN
+    VBUFFER := VINPUT1;
+    VINPUT1 := VINPUT2;
+    VINPUT2 := VBUFFER;
+END IF;
+DBMS_OUTPUT.PUT_LINE('LOS NUMEROS DIVISIBLES ENTRE 3 ENTRE ' ||VINPUT1 || ' Y ' || VINPUT2 || ' SON');
+
+FOR I IN (VINPUT1/3)..(VINPUT2/3)-(MOD(VINPUT2,3)) LOOP
+    DBMS_OUTPUT.PUT(I*3 || ', ');
+END LOOP;
+
+DBMS_OUTPUT.NEW_LINE;
+END;
+/
+
+/*Obtener el número de veces que un número se puede dividir por 2 obteniendo un resto 0,
+utilizando variable de sustitución para dar el valor del número.*/
+
+DECLARE
+VINPUT NUMBER := &INPUT1;
+VCOUNTER NUMBER := 0;
+BEGIN
+WHILE ABS(VINPUT/2) >= 1 LOOP
+    VCOUNTER := VCOUNTER+1;
+    VINPUT := VINPUT/2;
+END LOOP;
+DBMS_OUTPUT.PUT_LINE(VCOUNTER);
+END;
+/
+
+
+/*
+Crea un procedimiento PL/SQL que visualice el precio de un producto cuyo código se pasa como
+parámetro. Implementa el módulo de excepciones.
+*/
+
+CREATE OR REPLACE PROCEDURE verPrecioProd(prodCod in productos.cod_producto%type) as 
+    vtest number; 
+begin
+select precio_uni into vtest
+    from Productos
+    where prodCod = cod_producto;
+dbms_output.put_line(vtest);
+exception
+when no_data_found then
+dbms_output.put_line('oopsie');
+end verPrecioProd;
+/
+
+
+begin
+verPrecioProd(2341);
+end;
+/
+
+
+/*
+Crea un procedimiento que modifique el precio de un producto pasándole el código del
+producto y el nuevo precio. El procedimiento comprobará que la variación de precio no supere
+el 20% y que el producto existe. Si no existe indicarlo con un mensaje por pantalla. Se puede
+usar la función ABS(number) que hace el valor absoluto de un número.
+*/
+
+CREATE OR REPLACE PROCEDURE modPrecioProducto
+                    (codigoProd productos.cod_producto%type, nuevoPrecio productos.precio_uni%type) as
+    vOutPrecioProd productos.precio_uni%type;
+    vOutNombreProd productos.descripcion%type;
+    price_var_too_large exception;
+begin
+
+select precio_uni, descripcion into vOutPrecioProd, vOutNombreProd
+    from Productos
+    where codigoProd = cod_producto;
+
+if abs(vOutPrecioProd - nuevoPrecio) > vOutPrecioProd* 0.2 then
+    raise price_var_too_large;
+end if;
+
+dbms_output.put_line('El producto ' || vOutNombreProd || ' se ha actualizado de precio ' ||
+    vOutPrecioProd || ' > ' || nuevoPrecio);
+update productos
+    set precio_uni = nuevoPrecio
+    where cod_producto = codigoProd;
+
+exception
+when no_data_found then
+dbms_output.put_line('No se ha encontrado este producto');
+
+when price_var_too_large then
+dbms_output.put_line('Price variation too large');
+end;
+/
+
+execute modprecioproducto(1,15000);
+
+/*Crea un procedimiento que cambie el oficio de un empleado de la tabla emple por otro,
+con los parámetros número de empleado y nuevo oficio. 
+Visualizar por pantalla el número de empleado, el oficio anterior y el nuevo oficio. */
+
+select oficio from emple;
+
+create or replace procedure cambiarOficioEmple 
+    (cod emple.emp_no%type, nuevoOficio emple.oficio%type) as
+
+    vDenominadorEmple emple.apellido%type;
+    vOficioEmple emple.oficio%type;
+begin
+
+select apellido, oficio into vDenominadorEmple, vOficioEmple
+    from emple
+    where emp_no = cod;
+    
+if (vDenominadorEmple is null) then
+vDenominadorEmple := 'SIN_NOMBRE';
+end if;
+dbms_output.put_line
+    (vDenominadorEmple || ' de código ' || cod || ' y oficio ' || vOficioEmple ||
+    ' ahora trabaja como ' || nuevoOficio);
+update emple 
+    set oficio = nuevoOficio
+    where emp_no = cod;
+
+exception
+when no_data_found then
+dbms_output.put_line('No hay un empleado con ese código');
+end;
+/
+
+execute cambiarOficioEmple(99, 'SECRETARIO');
+
+/*
+Crea un procedimiento que reciba el nuevo oficio para un empleado como parámetro. El
+procedimiento debe cambiar ese nuevo oficio al empleado con número de empleado mayor. Si
+no existen empleados indicarlo con un mensaje. Es obligatorio utilizar el procedimiento
+cambiar_oficio del ejercicio anterior.
+*/
+
+create or replace procedure nuevoOficio
+    (nuevoOficio emple.oficio%type) as
+
+    vmax_emple emple.emp_no%type;
+begin
+    
+SELECT MAX(emp_no) into vmax_emple FROM EMPLE;
+
+cambiarOficioEmple(vmax_emple, nuevoOficio);
+
+exception
+when no_data_found then
+dbms_output.put_line('no hay empleados en la tabla' );
+end;
+/
+
+execute nuevoOficio('pepe');
+
+/* 
+Crea una función que devuelva el número de empleado de la tabla emple, pasando como
+parámetro el apellido. Si el empleado no se encuentra o hay muchos empleados con ese apellido
+indicarlo mediante los correspondientes mensajes y hacer que la función devuelva -1 si no
+encuentra el empleado, -2 si hay varios empleados con el mismo apellido y -3 si se da cualquier
+otra excepción
+*/
+
+create or replace function codForEmple
+    (ape emple.apellido%type)
+    return emple.emp_no%type as
+        rCodEmple emple.emp_no%type;
+    begin
+        select emp_no into rCodEmple
+        from Emple
+        where apellido = ape;
+    return rCodEmple;
+    exception
+    when no_data_found then
+    return -1;
+    when too_many_rows then
+    return -2;
+    when others then
+    return -3;
+    end codForEmple;
+    /
+    
+update emple
+set apellido = 'ARROYO' where emp_no = 99;
+
+select codForEmple('ARROYO') from emple;
